@@ -8,7 +8,7 @@
   let atomicSrc = "";
   let assetContract = "";
 
-  //const GATEWAY = "1984-twilson63-bugreportwarp-01paf0rtjc4.ws-us67.gitpod.io";
+  //const GATEWAY = "1984-twilson63-bugreportwarp-x9vdw2p03ny.ws-us69.gitpod.io";
 
   const GATEWAY = "testnet.redstone.tools";
   const arweave = window.Arweave.init({
