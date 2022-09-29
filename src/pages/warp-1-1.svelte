@@ -1,14 +1,16 @@
 <script>
   import { assoc } from "ramda";
+  import { onMount } from "svelte";
+
   let buyerWallet = {};
   let sellerWallet = {};
   let barContract = "";
   let atomicSrc = "";
   let assetContract = "";
 
-  const GATEWAY = "1984-twilson63-bugreportwarp-01paf0rtjc4.ws-us67.gitpod.io";
+  //const GATEWAY = "1984-twilson63-bugreportwarp-01paf0rtjc4.ws-us67.gitpod.io";
 
-  //const GATEWAY = "testnet.redstone.tools";
+  const GATEWAY = "testnet.redstone.tools";
   const arweave = window.Arweave.init({
     host: GATEWAY,
     port: 443,
@@ -16,9 +18,12 @@
   });
 
   //const warp = window.warp.WarpWebFactory.forTesting(arweave);
-  const warp = window.warp.WarpWebFactory.memCachedBased(arweave)
-    .useArweaveGateway()
-    .build();
+  let warp = onMount(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    warp = window.warp.WarpWebFactory.memCachedBased(arweave)
+      .useArweaveGateway()
+      .build();
+  });
 
   async function setup() {
     // generate buyer Wallet
@@ -255,6 +260,10 @@
   }
 </script>
 
+<svelte:head>
+  <script
+    src="https://unpkg.com/warp-contracts@1.1.14/bundles/web.bundle.min.js"></script>
+</svelte:head>
 <nav class="h-[72px] bg-gray-300 flex items-center justify-center">
   <a class="btn btn-ghost" href="/">Back to home</a>
 </nav>
