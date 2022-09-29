@@ -5,6 +5,8 @@
 
   import Home from "./pages/home.svelte";
   import About from "./pages/about.svelte";
+  import Warp1 from "./pages/warp-1-1.svelte";
+  import Warp2 from "./pages/warp-1-2.svelte";
 
   router.mode.hash();
   router.subscribe((_) => window.scrollTo(0, 0));
@@ -14,6 +16,12 @@
 <Transition>
   <Route path="/">
     <Home />
+  </Route>
+  <Route path="/warp-1-1">
+    <Warp1 />
+  </Route>
+  <Route path="/warp-1-2">
+    <Warp2 />
   </Route>
   <Route path="/about">
     <About />

@@ -1,81 +1,37 @@
-<h1 align="center">HypAR Template</h1>
-<p>Setup Permaweb Apps ⚡️ HypAR Apps!</p>
+# Bug Report Demo
 
-## Contents
+There is a bug in Warp 1.2 when using contracts that contain internalWrites, the result is state that does not have interactions applied over time. These interactions work well in Warp 1.1.x, so this repo is built to show two versions of the warp sdk and show the difference in output in hopes to showcase the problem. 
 
-* [Welcome](#welcome)
-* [Usage](#usage)
-* [Stack](#stack)
-* [Contributions](#contributions)
+The home page will show the description of the report and two buttons, button 1 navigates to a page that demonstrates 1.1.x of the Warp SDK, and button 2 navigates to a page that demonstrates 1.2.x of Warp. The use case will be as follows on testnet:
 
----
+* Generate 2 wallets (Wallet A, Wallet B)
+* Add Tokens to each wallet
+* Wallet A - creates a Tradeable Atomic Asset
+* Wallet A - Lists the Tradeable Atomic Asset For Sale in BAR
+* Wallet B - Purchases the Tradeable Atomic Asset using BAR
+* Print out the State
 
-## Welcome
+## Setup
 
-The Permaweb is changing the internet and the way applications are built, this toolkit gives web developers an on ramp to delivering permaweb applications.
+The setup step will need to deploy the following to testnet
 
-## Usage
+- BAR Contract to Testnet
+- Tradeable Atomic Asset Source
 
-``` sh
-npx degit twilson63/hypar myapp
-```
+## Create Atomic Asset
 
-Development Mode
+We will create an atomic asset of the text `Hello World`
 
-``` sh
-npm install
-npm run dev
-```
+## Put 50% up for sale
 
-Build
+In order to sale a tradeable asset we need to add the Bar contract as a pair.
+Then create the sale order with a price.
 
-``` sh
-npm run build
-```
 
-Deploy to permaweb
+## Buy 50% with BAR
 
-``` sh
-npm run deploy [wallet.json]
-```
+To buy a tradeable asset we need to call allow on the bar contract to make sure the buyer has 
+enough bar to purchase, then call create order on the asset contract to complete the transaction.
 
----
 
-## Stack
 
-The stack uses tools that promote efficiency for the permaweb platform and focused on the web and open source techonologies.
-
-* DaisyUI/TailwindCSS 
-* Svelte
-* arkb
-
-Svelte is focused on building high performing web applications with incredible developer experience!
-DaisyUI/TailwindCSS gives the developer a solid component library with the power of functional CSS
-arkb makes it easy to deploy to the permaweb if all the app files are sub 100k then you can deploy for free
-
-Libraries
-
-* Arweave
-* Warp
-* tinro
-
----
-
-## Contributing 
-
-Template Golas
-
-* Frictionless experience
-* Minimal
-* Builds should be small
-* Few opinions as possible
-
-Contributions are welcome, lets build the easiest environment to build for the permaweb!
-
-* Pull requests are welcome!
-
-Don't like the Stack, fork and add your favorite stack, but lets make these templates easy to use for the permaweb:
-
-* dev mode
-* build mode
-* deploy mode
