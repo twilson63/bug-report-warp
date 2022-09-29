@@ -35,3 +35,30 @@ enough bar to purchase, then call create order on the asset contract to complete
 
 
 
+
+---
+
+Added some uvu tests.
+
+* Warp1
+* Warp2
+
+> NOTE: In order to get warp1 test to work you need to go to `node_modules/warp1/package.json` and remove the exports section from the package
+
+``` json
+"exports": {
+  ".": {
+    "import": "./lib/esm/index.js",
+    "require": "./lib/cjs/index.js"
+  },
+  "./esm": "bundles/esm.bundle.js",
+  "./web": "bundles/web.bundle.js"
+},
+```
+
+Then you can run `yarn test:warp1`
+
+
+To run Warp2
+
+`yarn test:warp2`
