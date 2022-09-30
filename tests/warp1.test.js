@@ -20,7 +20,7 @@ let assetContract = "";
 
 
 test('ok', async () => {
-  const arlocal = new ArLocal.default(1984)
+  const arlocal = new ArLocal.default(1984, false)
   await arlocal.start()
 
   const arweave = Arweave.init({

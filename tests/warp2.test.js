@@ -13,7 +13,7 @@ let atomicSrc = "";
 let assetContract = "";
 
 test('warp2 purchase atomic asset', async () => {
-  const arlocal = new ArLocal.default(1987)
+  const arlocal = new ArLocal.default(1987, false)
   await arlocal.start()
   LoggerFactory.INST.logLevel('error');
 
@@ -161,7 +161,7 @@ async function setup(arweave) {
     }),
   });
   tx.addTag("App-Name", "SmartWeaveContract");
-  tx.addTag("Content-Type", "application/x.arweave-manifest+json");
+  tx.addTag("Content-Type", "text/plain");
   tx.addTag("Contract-Src", srctx.id);
 
   await arweave.transactions.sign(tx, buyerWallet.jwk);
