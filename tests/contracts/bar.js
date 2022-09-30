@@ -31,6 +31,9 @@ export async function handle(state, action) {
   if (input.function === "transfer") {
     const target = input.target;
     const quantity = input.qty;
+    console.log("BAR::transfer", {
+      target, quantity
+    });
     if (!Number.isInteger(quantity) || quantity === void 0) {
       throw new ContractError("Invalid value for quantity. Must be an integer.");
     }
@@ -40,9 +43,16 @@ export async function handle(state, action) {
     if (quantity <= 0 || caller === target) {
       throw new ContractError("Invalid token transfer.");
     }
+    console.log('BAR::transfer - caller balancer validation', {
+      callerBalance: balances[caller],
+      quantity
+    });
+
     if (balances[caller] < quantity) {
+      console.log('BAR::transfer - caller balance validation failed');
       throw new ContractError("Caller balance not high enough to send " + quantity + " token(s).");
     }
+    console.log('BAR::transfer - caller balance validation success');
     balances[caller] -= quantity;
     if (target in balances) {
       balances[target] += quantity;
@@ -101,6 +111,7 @@ export async function handle(state, action) {
     return { state };
   }
   if (input.function === "claim") {
+    console.log("BAR::claim")
     const txID = input.txID;
     const qty = input.qty;
     // make claim idempotent - if already claimed just return success

@@ -13,7 +13,7 @@ let atomicSrc = "";
 let assetContract = "";
 
 test('warp2 purchase atomic asset', async () => {
-  const arlocal = new ArLocal.default(1987)
+  const arlocal = new ArLocal.default(1987, false);
   await arlocal.start()
   LoggerFactory.INST.logLevel('error');
 
@@ -27,17 +27,26 @@ test('warp2 purchase atomic asset', async () => {
   await setup(arweave)
   await arweave.api.get('mine')
 
-  const so = await createSalesOrder(warp, arweave)
-  assert.equal(so.cachedValue.state.balances[assetContract], 5000)
+  const so = await createSalesOrder(warp, arweave);
+  assert.equal(so.cachedValue.state.balances[assetContract], 5000);
+  //console.dir(so.cachedValue.state, {depth: null});
 
-  const p = await purchaseAsset(warp, arweave)
+
+  const {asset, bar} = await purchaseAsset(warp, arweave)
+  assert.equal(asset.cachedValue.state.balances[sellerWallet.addr], 5000)
+  assert.equal(asset.cachedValue.state.balances[buyerWallet.addr], 10);
+  console.dir(asset.cachedValue.state, {depth: null});
+
+  await arlocal.stop();
+
+  /*const p = await purchaseAsset(warp, arweave)
   assert.equal(p[0].cachedValue.state.balances[sellerWallet.addr], 5000)
   assert.equal(p[0].cachedValue.state.balances[buyerWallet.addr], 10)
 
   assert.equal(p[1].cachedValue.state.balances[sellerWallet.addr], 1009800)
   assert.equal(p[1].cachedValue.state.balances[buyerWallet.addr], 990000)
 
-  await arlocal.stop()
+  await arlocal.stop()*/
 })
 
 test.run()
@@ -63,21 +72,28 @@ async function purchaseAsset(warp, arweave) {
     function: "allow",
     target: assetContract,
     qty: 10000,
-  });
-
-  await arweave.api.get('mine')
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  }, {strict: true});
 
   const result2 = await asset.writeInteraction({
     function: "createOrder",
     pair: [barContract, assetContract],
     qty: 10000,
     transaction: result.originalTxId,
-  });
+  }, {strict: true});
 
-  await arweave.api.get('mine')
+  console.log(result2);
 
-  return Promise.all([asset.readState(), bar.readState()])
+  console.log('ASSET readState');
+  const assetResult = await asset.readState();
+  //console.log(assetResult);
+
+
+  const barResult = await bar.readState();
+
+  return {
+    asset: assetResult,
+    bar: barResult
+  };
 }
 
 async function createSalesOrder(warp, arweave) {
@@ -87,24 +103,19 @@ async function createSalesOrder(warp, arweave) {
     .setEvaluationOptions({
       internalWrites: true,
       allowBigInt: true,
-    });
+    }, {strict: true});
 
   await contract.writeInteraction({
     function: "addPair",
     pair: barContract,
   });
 
-  await arweave.api.get('mine')
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
   await contract.writeInteraction({
     function: "createOrder",
     qty: 5000,
     pair: [assetContract, barContract],
     price: 1000,
-  });
-  await arweave.api.get('mine')
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  }, {strict: true});
 
   return await contract.readState();
 
@@ -161,7 +172,7 @@ async function setup(arweave) {
     }),
   });
   tx.addTag("App-Name", "SmartWeaveContract");
-  tx.addTag("Content-Type", "application/x.arweave-manifest+json");
+  tx.addTag("Content-Type", "text/plain");
   tx.addTag("Contract-Src", srctx.id);
 
   await arweave.transactions.sign(tx, buyerWallet.jwk);
@@ -187,7 +198,7 @@ async function setup(arweave) {
     data: "Hello World",
   });
   xtx.addTag("App-Name", "SmartWeaveContract");
-  xtx.addTag("Content-Type", "application/x.arweave-manifest+json");
+  xtx.addTag("Content-Type", "text/plain");
   xtx.addTag("Contract-Src", atomicSrc);
   xtx.addTag(
     "Init-State",

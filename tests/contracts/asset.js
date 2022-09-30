@@ -23,11 +23,13 @@ var __async = (__this, __arguments, generator) => {
 };
 var feeWallet = "SMft-XozLyxl0ztM-gPSYKvlZVCBiiftNIb4kGFI7wg";
 var claimBalance = (tokenID, transferTx, qty) => __async(void 0, null, function* () {
+  console.log("ASSET::CreateOrder:claimBalance - before internal write");
   const result = yield SmartWeave.contracts.write(tokenID, {
     function: "claim",
     txID: transferTx,
     qty
   });
+  console.log("ASSET::CreateOrder:claimBalance - after internal wriate");
   //console.log('Claim Result:', JSON.stringify(result))
   /*
   if (result.type !== "ok") {
@@ -96,6 +98,8 @@ var AddPair = (state, action) => __async(void 0, null, function* () {
     pair: [getContractID(), newPair],
     orders: []
   });
+  console.log('pair added');
+
   return {
     state,
     result: {
@@ -124,6 +128,7 @@ var CancelOrder = (state, action) => __async(void 0, null, function* () {
       state.balances[caller] = order.quantity;
     }
   } else {
+    console.log('ASSET: cancel order::transfer')
     const result = yield SmartWeave.contracts.write(order.token, {
       function: "transfer",
       target: caller,
@@ -156,6 +161,7 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
   const price = input.price;
   let tokenTx = input.transaction;
   let balances = state.balances;
+  console.log('ASSET::CreateOrder');
   ContractAssert(
     isAddress(usedPair[0]) && isAddress(usedPair[1]),
     "One of two supplied pair tokens is invalid"
@@ -198,7 +204,9 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
         "No token transaction provided given the token in the order is from a different contract"
       );
     }
+    console.log('ASSET::CreateOrder before claim balance');
     yield claimBalance(contractID, tokenTx, qty);
+    console.log('ASSET::CreateOrder after claim balance');
   }
   const refundTransfer = () => __async(void 0, null, function* () {
     if (contractID === SmartWeave.contract.id) {
@@ -209,11 +217,13 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
         balances[caller] = qty;
       }
     } else {
+      console.log('ASSET::CreateOrder:refundTransfer before internal write transfer', contractID);
       const result = yield SmartWeave.contracts.write(contractID, {
         function: "transfer",
         target: caller,
         qty
       });
+      console.log('ASSET::CreateOrder:refundTransfer after internal write transfer', result);
       if (result.type !== "ok") {
         throw new ContractError(
           `Unable to return order with txID: ${SmartWeave.transaction.id}`
@@ -228,7 +238,9 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
     }
   }
   if (pairIndex === -1) {
+    console.log('ASSET: before refund transfer');
     yield refundTransfer();
+    console.log('ASSET: after refund transfer')
     return {
       state,
       result: {
