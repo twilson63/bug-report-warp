@@ -134,6 +134,9 @@ export async function handle(state, action) {
     if (obj.qty !== qty) {
       throw new ContractError("Claiming incorrect quantity of tokens");
     }
+    if (balances[caller] === undefined) {
+      balances[caller] = 0;
+    }
     balances[caller] += obj.qty;
     claimable.splice(index, 1);
     claims.push(txID);

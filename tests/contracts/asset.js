@@ -630,6 +630,9 @@ export async function handle(state, action) {
         throw new ContractError("This claim has already been made");
       }
     }
+    if (balances[caller] === undefined) {
+      balances[caller] = 0;
+    }
     balances[caller] += obj.qty;
     claimable.splice(index, 1);
     claims.push(txID);
