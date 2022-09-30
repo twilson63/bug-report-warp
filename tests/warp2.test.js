@@ -1,9 +1,9 @@
-import { test } from 'uvu'
+import {test} from 'uvu'
 import * as assert from 'uvu/assert'
 import Arweave from 'arweave'
-import { WarpFactory, LoggerFactory } from 'warp2/mjs'
+import {LoggerFactory, WarpFactory} from 'warp2/mjs'
 import ArLocal from 'arlocal'
-import { assoc } from 'ramda'
+import {assoc} from 'ramda'
 import fs from 'fs'
 
 let buyerWallet = {};
@@ -25,18 +25,35 @@ test('warp2 purchase atomic asset', async () => {
 
   const warp = WarpFactory.forLocal(1987)
   await setup(arweave)
-  await arweave.api.get('mine')
+  await arweave.api.get('mine');
 
+  const barC = warp
+    .contract(barContract)
+    .connect(buyerWallet.jwk)
+    .setEvaluationOptions({
+      internalWrites: true,
+      allowBigInt: true,
+    });
+
+  /*const barState_1 = await barC.readState();
+  console.dir(barState_1.cachedValue.state, {depth: null});
+*/
   const so = await createSalesOrder(warp, arweave);
   assert.equal(so.cachedValue.state.balances[assetContract], 5000);
   //console.dir(so.cachedValue.state, {depth: null});
 
+  /*const barState = await barC.readState();
+  console.dir(barState.cachedValue.state, {depth: null});*/
 
-  const {asset, bar} = await purchaseAsset(warp, arweave)
-  assert.equal(asset.cachedValue.state.balances[sellerWallet.addr], 5000)
+  const {asset, bar} = await purchaseAsset(warp, arweave);
+
+
+  console.log('====== BAR STATE ====');
+  console.dir(bar.cachedValue.state, {depth: null});
+  assert.equal(asset.cachedValue.state.balances[sellerWallet.addr], 5000);
   assert.equal(asset.cachedValue.state.balances[buyerWallet.addr], 10);
-  console.dir(asset.cachedValue.state, {depth: null});
-
+  assert.equal(bar.cachedValue.state.balances[sellerWallet.addr], 1009800);
+  assert.equal(bar.cachedValue.state.balances[buyerWallet.addr], 990000);
   await arlocal.stop();
 
   /*const p = await purchaseAsset(warp, arweave)
@@ -81,13 +98,9 @@ async function purchaseAsset(warp, arweave) {
     transaction: result.originalTxId,
   }, {strict: true});
 
-  console.log(result2);
-
-  console.log('ASSET readState');
+  console.log('=========== ASSET readState');
   const assetResult = await asset.readState();
   //console.log(assetResult);
-
-
   const barResult = await bar.readState();
 
   return {
@@ -123,7 +136,7 @@ async function createSalesOrder(warp, arweave) {
 
 async function setup(arweave) {
   // generate buyer Wallet
-  buyerWallet = { jwk: await arweave.wallets.generate() };
+  buyerWallet = {jwk: await arweave.wallets.generate()};
   buyerWallet = assoc(
     "addr",
     await arweave.wallets.jwkToAddress(buyerWallet.jwk),
@@ -133,7 +146,7 @@ async function setup(arweave) {
     `mint/${buyerWallet.addr}/${arweave.ar.arToWinston("1000")}`
   );
   // generate seller Wallet
-  sellerWallet = { jwk: await arweave.wallets.generate() };
+  sellerWallet = {jwk: await arweave.wallets.generate()};
   sellerWallet = assoc(
     "addr",
     await arweave.wallets.jwkToAddress(sellerWallet.jwk),
@@ -147,7 +160,7 @@ async function setup(arweave) {
   const src = fs.readFileSync('./tests/contracts/bar.js', 'utf-8')
 
   // deploy source transaction
-  const srctx = await arweave.createTransaction({ data: src });
+  const srctx = await arweave.createTransaction({data: src});
   srctx.addTag("App-Name", "SmartWeaveContractSource");
   srctx.addTag("App-Version", "0.3.0");
   srctx.addTag("Content-Type", "application/javascript");
@@ -183,7 +196,7 @@ async function setup(arweave) {
   const assetSrc = fs.readFileSync('./tests/contracts/asset.js', 'utf-8')
 
   // deploy source transaction
-  const asrctx = await arweave.createTransaction({ data: assetSrc });
+  const asrctx = await arweave.createTransaction({data: assetSrc});
   asrctx.addTag("App-Name", "SmartWeaveContractSource");
   asrctx.addTag("App-Version", "0.3.0");
   asrctx.addTag("Content-Type", "application/javascript");

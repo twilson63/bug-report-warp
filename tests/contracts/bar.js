@@ -32,7 +32,7 @@ export async function handle(state, action) {
     const target = input.target;
     const quantity = input.qty;
     console.log("BAR::transfer", {
-      target, quantity
+      target, quantity, caller
     });
     if (!Number.isInteger(quantity) || quantity === void 0) {
       throw new ContractError("Invalid value for quantity. Must be an integer.");
@@ -145,6 +145,12 @@ export async function handle(state, action) {
     if (obj.qty !== qty) {
       throw new ContractError("Claiming incorrect quantity of tokens");
     }
+    console.log('BAR::claim:claimable_obj', {obj, caller, callerBalance: balances[caller]});
+    if (balances[caller] === undefined) {
+      balances[caller] = 0;
+    }
+    // this is broken. balances[caller] might be undefined at this point (without the above fix).
+    // undefined + number = NaN in Javascript
     balances[caller] += obj.qty;
     claimable.splice(index, 1);
     claims.push(txID);

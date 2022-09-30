@@ -29,7 +29,7 @@ var claimBalance = (tokenID, transferTx, qty) => __async(void 0, null, function*
     txID: transferTx,
     qty
   });
-  console.log("ASSET::CreateOrder:claimBalance - after internal wriate");
+  console.log("ASSET::CreateOrder:claimBalance - after internal write", result.state);
   //console.log('Claim Result:', JSON.stringify(result))
   /*
   if (result.type !== "ok") {
@@ -259,6 +259,7 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
   }
   const dominantToken = state.pairs[pairIndex].pair[0];
   try {
+    console.log("ASSET::CreaterOrder - before matchOrder call");
     const { orderbook, foreignCalls, matches } = matchOrder(
       {
         pair: {
@@ -274,6 +275,7 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
       },
       sortedOrderbook
     );
+    console.log("ASSET::CreaterOrder - after matchOrder call");
     state.pairs[pairIndex].orders = orderbook;
     if (matches.length > 0) {
       const vwap = matches.map(({ qty: volume, price: price2 }) => volume * price2).reduce((a, b) => a + b, 0) / matches.map(({ qty: volume }) => volume).reduce((a, b) => a + b, 0);
@@ -298,10 +300,15 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
           balances[foreignCalls[i].input.target] = foreignCalls[i].input.qty;
         }
       } else {
+        console.log("ASSET::CreateOrder - before internal write", {
+          contract: foreignCalls[i].contract,
+          input: foreignCalls[i].input
+        });
         const result = yield SmartWeave.contracts.write(
           foreignCalls[i].contract,
           foreignCalls[i].input
         );
+        console.log("ASSET::CreateOrder - after internal write", result);
         if (result.type !== "ok") {
           throw new ContractError(
             `Unable to fill order with txID: ${foreignCalls[i].txID}`
@@ -320,6 +327,7 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
       }
     };
   } catch (e) {
+    console.log("ASSET::CreateOrder:catch", e);
     yield refundTransfer();
     return {
       state,
@@ -331,6 +339,7 @@ var CreateOrder = (state, action) => __async(void 0, null, function* () {
   }
 });
 function matchOrder(input, orderbook) {
+  console.log("CreateOrder::matchOrder");
   var _a, _b;
   const orderType = input.price ? "limit" : "market";
   const foreignCalls = [];
